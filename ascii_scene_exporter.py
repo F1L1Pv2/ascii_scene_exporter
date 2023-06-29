@@ -53,6 +53,7 @@ class ExportAS(bpy.types.Operator, ExportHelper):
                         for node in slot.material.node_tree.nodes:
                             if node.type == 'TEX_IMAGE':
                                 texture_path = "/sprites/" + node.image.filepath.split('/')[-1]
+                                image_node = node
                                 break
                         if texture_path is not None:
                             break
@@ -73,10 +74,13 @@ class ExportAS(bpy.types.Operator, ExportHelper):
 
                 # If a texture image is found, copy it to the sprites folder
                 if texture_path is not None:
-                    import shutil
-                    src_path = bpy.path.abspath(node.image.filepath)
-                    dst_path = os.path.join(sprites_dir, node.image.filepath.split('/')[-1])
-                    shutil.copy(src_path, dst_path)
+                    # import shutil
+                    # src_path = bpy.path.abspath(node.image.filepath)
+                    # dst_path = os.path.join(sprites_dir, node.image.filepath.split('/')[-1])
+                    # shutil.copy(src_path, dst_path)
+                    image_node.image.file_format = 'PNG'
+                    image_node.image.filepath_raw = os.path.join(sprites_dir, node.image.filepath.split('/')[-1])
+                    image_node.image.save()
 
         with open(os.path.join(scenes_dir, scene_name), 'w') as f:
             f.write(json.dumps(output, indent=4))
