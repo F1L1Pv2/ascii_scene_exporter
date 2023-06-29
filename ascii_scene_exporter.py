@@ -84,7 +84,7 @@ class ExportAS(bpy.types.Operator, ExportHelper):
         return {'FINISHED'}
 
 def menu_func_export(self, context):
-    self.layout.operator(ExportAS.bl_idname, text="Ascii Scene (.)")
+    self.layout.operator(ExportAS.bl_idname, text="Ascii Scene (.json)")
 
 def register():
     bpy.utils.register_class(ExportAS)
