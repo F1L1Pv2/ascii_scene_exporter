@@ -70,7 +70,21 @@ class ExportAS(bpy.types.Operator, ExportHelper):
                 # Export the mesh to an .obj file
                 bpy.ops.object.select_all(action='DESELECT')
                 obj.select_set(True)
+
+                # Temporarily move the object to the origin
+                original_location = obj.location.copy()
+                obj.location = (0, 0, 0)
+
+                original_rotation = obj.rotation_euler.copy()
+                obj.rotation_euler = (0, 0, 0)
+
+
                 bpy.ops.export_scene.obj(filepath=os.path.join(models_dir, obj.name + ".obj"), use_selection=True)
+
+                # Move the object back to its original location
+                obj.location = original_location
+                obj.rotation_euler = original_rotation
+
 
                 # If a texture image is found, copy it to the sprites folder
                 if texture_path is not None:
