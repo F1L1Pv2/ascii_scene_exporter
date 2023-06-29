@@ -22,7 +22,7 @@ class ExportAS(bpy.types.Operator, ExportHelper):
     def execute(self, context):
         scene = context.scene
         output = []
-
+        exported_meshes = set()
 
         scene_name = self.filepath.split('/')[-1]
         filepath = '/'.join(self.filepath.split('/')[:-1])
@@ -37,6 +37,8 @@ class ExportAS(bpy.types.Operator, ExportHelper):
 
         for obj in scene.objects:
             if obj.type == 'MESH':
+                base_name = obj.name.split('.')[0]
+
                 model_matrix = {
                     "position": list(obj.location),
                     "rotation": list(obj.rotation_euler),
@@ -60,7 +62,7 @@ class ExportAS(bpy.types.Operator, ExportHelper):
 
                 output.append({
                     obj.name: {
-                        "model_path": "/models/" + obj.name + ".obj",
+                        "model_path": "/models/" + base_name + ".obj",
                         "texture_path": texture_path,
                         "model_matrix": model_matrix,
                         "tags": tags
@@ -68,22 +70,24 @@ class ExportAS(bpy.types.Operator, ExportHelper):
                 })
 
                 # Export the mesh to an .obj file
-                bpy.ops.object.select_all(action='DESELECT')
-                obj.select_set(True)
+                if base_name not in exported_meshes:
+                    bpy.ops.object.select_all(action='DESELECT')
+                    obj.select_set(True)
 
-                # Temporarily move the object to the origin
-                original_location = obj.location.copy()
-                obj.location = (0, 0, 0)
+                    # Temporarily move the object to the origin
+                    original_location = obj.location.copy()
+                    obj.location = (0, 0, 0)
 
-                original_rotation = obj.rotation_euler.copy()
-                obj.rotation_euler = (0, 0, 0)
+                    original_rotation = obj.rotation_euler.copy()
+                    obj.rotation_euler = (0, 0, 0)
 
 
-                bpy.ops.export_scene.obj(filepath=os.path.join(models_dir, obj.name + ".obj"), use_selection=True)
+                    bpy.ops.export_scene.obj(filepath=os.path.join(models_dir, obj.name + ".obj"), use_selection=True)
+                    exported_meshes.add(base_name)
 
-                # Move the object back to its original location
-                obj.location = original_location
-                obj.rotation_euler = original_rotation
+                    # Move the object back to its original location
+                    obj.location = original_location
+                    obj.rotation_euler = original_rotation
 
 
                 # If a texture image is found, copy it to the sprites folder
