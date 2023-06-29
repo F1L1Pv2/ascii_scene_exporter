@@ -23,6 +23,18 @@ class ExportAS(bpy.types.Operator, ExportHelper):
         scene = context.scene
         output = []
 
+
+        scene_name = self.filepath.split('/')[-1]
+        filepath = '/'.join(self.filepath.split('/')[:-1])
+
+        # Create directories if they don't exist
+        models_dir = os.path.join(filepath, "models")
+        scenes_dir = os.path.join(filepath, "scenes")
+        sprites_dir = os.path.join(filepath, "sprites")
+        os.makedirs(models_dir, exist_ok=True)
+        os.makedirs(scenes_dir, exist_ok=True)
+        os.makedirs(sprites_dir, exist_ok=True)
+
         for obj in scene.objects:
             if obj.type == 'MESH':
                 model_matrix = {
@@ -54,13 +66,25 @@ class ExportAS(bpy.types.Operator, ExportHelper):
                     }
                 })
 
-        with open(self.filepath, 'w') as f:
+                # Export the mesh to an .obj file
+                bpy.ops.object.select_all(action='DESELECT')
+                obj.select_set(True)
+                bpy.ops.export_scene.obj(filepath=os.path.join(models_dir, obj.name + ".obj"), use_selection=True)
+
+                # If a texture image is found, copy it to the sprites folder
+                if texture_path is not None:
+                    import shutil
+                    src_path = bpy.path.abspath(node.image.filepath)
+                    dst_path = os.path.join(sprites_dir, node.image.filepath.split('/')[-1])
+                    shutil.copy(src_path, dst_path)
+
+        with open(os.path.join(scenes_dir, scene_name), 'w') as f:
             f.write(json.dumps(output, indent=4))
 
         return {'FINISHED'}
 
 def menu_func_export(self, context):
-    self.layout.operator(ExportAS.bl_idname, text="Ascii Scene (.json)")
+    self.layout.operator(ExportAS.bl_idname, text="Ascii Scene (.)")
 
 def register():
     bpy.utils.register_class(ExportAS)
