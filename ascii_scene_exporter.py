@@ -46,8 +46,8 @@ class ExportAS(bpy.types.Operator, ExportHelper):
                 }
 
                 tags = []
-                if "tags" in obj:
-                    tags = obj["tags"].split(',')
+                if "tags" in obj.data:
+                    tags = obj.data["tags"].split(',')
 
                 texture_path = None
                 if obj.data.materials:
