@@ -22,6 +22,7 @@ class ExportAS(bpy.types.Operator, ExportHelper):
     def execute(self, context):
         scene = context.scene
         output = []
+        exported_textures = []
         exported_meshes = set()
 
         scene_name = self.filepath.split('/')[-1]
@@ -96,9 +97,14 @@ class ExportAS(bpy.types.Operator, ExportHelper):
                     # src_path = bpy.path.abspath(node.image.filepath)
                     # dst_path = os.path.join(sprites_dir, node.image.filepath.split('/')[-1])
                     # shutil.copy(src_path, dst_path)
-                    image_node.image.file_format = 'PNG'
-                    image_node.image.filepath_raw = os.path.join(sprites_dir, node.image.filepath.split('/')[-1])
-                    image_node.image.save()
+
+                    if texture_path not in exported_textures:
+
+                        image_node.image.file_format = 'PNG'
+                        image_node.image.filepath_raw = os.path.join(sprites_dir, node.image.filepath.split('/')[-1])
+                        image_node.image.save()
+
+                        exported_textures.append(texture_path)
 
         with open(os.path.join(scenes_dir, scene_name), 'w') as f:
             f.write(json.dumps(output, indent=4))
